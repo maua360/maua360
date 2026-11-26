@@ -132,8 +132,8 @@
       "url": "https://grupoabcnews.com.br/rss.xml",
       "fetch_full_text": true,
       "verified": true,
-      "enabled": true,
-      "nota": "testada 26/11/2026: feed RSS ok, só com resumo; texto baixado da página"
+      "enabled": false,
+      "nota": "testada 26/11/2026: o feed só traz o título e o site bloqueia o robô ao abrir a matéria (erro 403). Desativada."
     },
     {
       "name": "Portal Opinião Pública",

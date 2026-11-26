@@ -71,14 +71,19 @@ class Database:
             conn.close()
 
     def is_known(self, url: str, title: str) -> bool:
-        """True se a URL ou um título equivalente já foi visto (exceto falhas, que podem ser refeitas)."""
+        """True se a URL ou um título equivalente já foi tratado.
+
+        Falhas ("erro") e textos curtos podem ser refeitos. Uma mesma pauta pode ter vários
+        registros (ex.: link do Google curto e depois o link do veículo), por isso basta
+        um registro definitivo para contar como conhecida.
+        """
         with self._conn() as conn:
             row = conn.execute(
-                "SELECT status, error FROM articles WHERE url_hash = ? OR title_hash = ? LIMIT 1",
+                "SELECT 1 FROM articles WHERE (url_hash = ? OR title_hash = ?)"
+                " AND status != 'erro' AND COALESCE(error, '') != 'texto insuficiente' LIMIT 1",
                 (_sha(normalize_url(url)), _sha(normalize_title(title))),
             ).fetchone()
-        # "texto insuficiente" também pode ser refeito: o link pode abrir na próxima rodada.
-        return row is not None and row["status"] != "erro" and row["error"] != "texto insuficiente"
+        return row is not None
 
     def record(
         self,
