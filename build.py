@@ -168,8 +168,7 @@ def layout(title: str, body: str, *, description: str = "", canonical: str = "/"
     <a href="/contato/">Contato</a><a href="/anuncie/">Anuncie</a>
   </nav>
   <nav aria-label="Redes sociais">
-    <a href="{ESC(SITE['instagram'])}" rel="noopener">Instagram</a>
-    <a href="{ESC(SITE['facebook'])}" rel="noopener">Facebook</a>
+    {"".join(f'<a href="{ESC(SITE[k])}" rel="noopener">{n}</a>' for k, n in (("instagram", "Instagram"), ("facebook", "Facebook")) if SITE.get(k))}
     {f'<a href="https://wa.me/{SITE["whatsapp"]}" rel="noopener">WhatsApp</a>' if SITE.get("whatsapp") else f'<a href="mailto:{SITE["email_redacao"]}">E-mail</a>'}
     <a href="/feed.xml">RSS</a>
   </nav>
