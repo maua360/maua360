@@ -20,7 +20,7 @@ from logging.handlers import RotatingFileHandler
 from ai_writer import AIWriter, AIWriterError, unverified_numbers
 from config import BASE_DIR, settings
 from database import Database
-from relevance import is_relevant
+from relevance import is_maua, is_relevant
 from scraper import MIN_TEXT_CHARS, Scraper
 from github_publisher import GitHubPublisher
 from wp_publisher import WordPressPublisher, WPError
@@ -66,9 +66,12 @@ def run_once(dry_run: bool = False) -> dict[str, int]:
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=settings.max_age_hours)
               if settings.max_age_hours else None)
     processed = 0
+    abc_used = 0
 
+    # 1ª passada (sem gastar tokens): filtra e separa pautas de Mauá das do resto do ABC.
+    candidates = []
     for art in articles:
-        if _stop or processed >= settings.max_articles_per_run:
+        if _stop:
             break
         if db.is_known(art.url, art.title):
             counts["duplicadas"] += 1
@@ -88,6 +91,20 @@ def run_once(dry_run: bool = False) -> dict[str, int]:
             db.record(art.url, art.title, art.source, "descartada", score)
             log.debug("Descartada (%s): %s", score, art.title)
             continue
+        candidates.append((is_maua(hits, art.trust_region), score, art, hits))
+
+    # Mauá primeiro (maior nota antes); o resto do ABC só completa as vagas, até MAX_ABC_PER_RUN.
+    candidates.sort(key=lambda c: (not c[0], -c[1]))
+    log.info("Candidatas: %d de Mauá, %d do Grande ABC",
+             sum(1 for c in candidates if c[0]), sum(1 for c in candidates if not c[0]))
+
+    for maua, score, art, hits in candidates:
+        if _stop or processed >= settings.max_articles_per_run:
+            break
+        if not maua:
+            if abc_used >= settings.max_abc_per_run:
+                continue  # não registra: pode entrar numa rodada com menos pautas de Mauá
+            abc_used += 1
 
         scraper.enrich(art)
         if len(art.text) < MIN_TEXT_CHARS:

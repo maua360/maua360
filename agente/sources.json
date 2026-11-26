@@ -37,8 +37,9 @@
       "base_url": "https://www.maua.sp.gov.br",
       "trust_region": true,
       "verified": false,
-      "enabled": true,
-      "_nota": "Site sem RSS conhecido. Confirme a URL da listagem e o seletor dos links."
+      "enabled": false,
+      "_nota": "Site sem RSS conhecido. Confirme a URL da listagem e o seletor dos links.",
+      "nota": "Desativada em 26/11/2026: URL/seletores não conferidos (Câmara deu 404). Coberta pelas buscas do Google Notícias abaixo."
     },
     {
       "name": "Câmara Municipal de Mauá",
@@ -49,8 +50,9 @@
       "base_url": "https://camaramaua.sp.gov.br",
       "trust_region": true,
       "verified": false,
-      "enabled": true,
-      "_nota": "Confirme a página de notícias e os seletores."
+      "enabled": false,
+      "_nota": "Confirme a página de notícias e os seletores.",
+      "nota": "Desativada em 26/11/2026: URL/seletores não conferidos (Câmara deu 404). Coberta pelas buscas do Google Notícias abaixo."
     },
     {
       "name": "CPTM - Linha 10",
@@ -61,8 +63,39 @@
       "base_url": "https://www.cptm.sp.gov.br",
       "trust_region": false,
       "verified": false,
+      "enabled": false,
+      "_nota": "Notícias da CPTM cobrem toda a rede; o filtro de relevância deixa passar só o que citar Linha 10/Mauá/ABC.",
+      "nota": "Desativada em 26/11/2026: URL/seletores não conferidos (Câmara deu 404). Coberta pelas buscas do Google Notícias abaixo."
+    },
+    {
+      "name": "Google Notícias - Prefeitura de Mauá",
+      "type": "rss",
+      "url": "https://news.google.com/rss/search?q=%22Prefeitura%20de%20Mau%C3%A1%22%20when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+      "fetch_full_text": false,
+      "trust_region": false,
+      "verified": false,
       "enabled": true,
-      "_nota": "Notícias da CPTM cobrem toda a rede; o filtro de relevância deixa passar só o que citar Linha 10/Mauá/ABC."
+      "_nota": "Agrega vários veículos. Os links passam por redirecionamento do Google; só o título/resumo é usado."
+    },
+    {
+      "name": "Google Notícias - Câmara de Mauá",
+      "type": "rss",
+      "url": "https://news.google.com/rss/search?q=%22C%C3%A2mara%20de%20Mau%C3%A1%22%20when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+      "fetch_full_text": false,
+      "trust_region": false,
+      "verified": false,
+      "enabled": true,
+      "_nota": "Agrega vários veículos. Os links passam por redirecionamento do Google; só o título/resumo é usado."
+    },
+    {
+      "name": "Google Notícias - Linha 10-Turquesa",
+      "type": "rss",
+      "url": "https://news.google.com/rss/search?q=%22Linha%2010%22%20CPTM%20Mau%C3%A1%20when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+      "fetch_full_text": false,
+      "trust_region": false,
+      "verified": false,
+      "enabled": true,
+      "_nota": "Agrega vários veículos. Os links passam por redirecionamento do Google; só o título/resumo é usado."
     }
   ]
 }

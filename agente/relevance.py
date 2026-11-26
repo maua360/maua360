@@ -67,3 +67,8 @@ def is_relevant(title: str, body: str, min_score: int, trust_region: bool = Fals
     score, hits = relevance_score(title, body, trust_region)
     has_local = trust_region or any(h in MAUA_TERMS or h in ABC_TERMS for h in hits)
     return (has_local and score >= min_score), score, hits
+
+
+def is_maua(hits: list[str], trust_region: bool = False) -> bool:
+    """Pauta de Mauá (prioridade) x pauta só do Grande ABC (complemento)."""
+    return trust_region or any(h in MAUA_TERMS for h in hits)
