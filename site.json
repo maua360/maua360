@@ -4,8 +4,8 @@
   "url": "https://maua360.com.br",
   "idioma": "pt-BR",
   "descricao": "Portal de notícias de Mauá e do Grande ABC: cidade, política, saúde, esporte e cultura, com foco no que muda a vida de quem mora aqui.",
-  "whatsapp": "5511900000000",
-  "whatsapp_exibicao": "(11) 90000-0000",
+  "whatsapp": "",
+  "whatsapp_exibicao": "",
   "email_redacao": "redacao@maua360.com.br",
   "email_comercial": "comercial@maua360.com.br",
   "instagram": "https://www.instagram.com/maua360",
@@ -13,10 +13,25 @@
   "canal_whatsapp": "",
   "posts_por_pagina": 18,
   "editorias": [
-    {"nome": "Notícias", "slug": "noticias"},
-    {"nome": "Política", "slug": "politica"},
-    {"nome": "Esportes", "slug": "esportes"},
-    {"nome": "Entretenimento", "slug": "entretenimento"},
-    {"nome": "Saúde", "slug": "saude"}
+    {
+      "nome": "Notícias",
+      "slug": "noticias"
+    },
+    {
+      "nome": "Política",
+      "slug": "politica"
+    },
+    {
+      "nome": "Esportes",
+      "slug": "esportes"
+    },
+    {
+      "nome": "Entretenimento",
+      "slug": "entretenimento"
+    },
+    {
+      "nome": "Saúde",
+      "slug": "saude"
+    }
   ]
 }

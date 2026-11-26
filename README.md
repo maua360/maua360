@@ -55,6 +55,5 @@ Testar no computador: `python3 build.py --serve` e abrir http://localhost:8000.
 
 ## Pendências
 
-- Trocar o WhatsApp de exemplo em `site.json` e nas páginas Contato/Anuncie (`5511900000000`).
-- Preencher o endereço em `content/paginas/expediente.html`.
+- WhatsApp: quando houver número, preencha `whatsapp` em `site.json` (ex.: `5511912345678`); o site passa a mostrar os links de WhatsApp. Sem número, os pedidos de pauta vão para redacao@.
 - Colocar o link do canal de WhatsApp em `site.json` quando ele existir.

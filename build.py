@@ -30,6 +30,10 @@ BRT = timezone(timedelta(hours=-3))
 MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
          "agosto", "setembro", "outubro", "novembro", "dezembro"]
 ESC = html.escape
+# Contato para pautas: WhatsApp se houver número em site.json, senão e-mail da redação.
+PAUTA_URL = (f"https://wa.me/{SITE['whatsapp']}" if SITE.get("whatsapp")
+             else f"mailto:{SITE['email_redacao']}")
+PAUTA_CANAL = "WhatsApp" if SITE.get("whatsapp") else "e-mail"
 
 
 # ----------------------------------------------------------------- utilidades
@@ -137,7 +141,7 @@ def layout(title: str, body: str, *, description: str = "", canonical: str = "/"
 <header class="topo">
   <div class="faixa"><div class="wrap">
     <span id="hoje"></span>
-    <a href="https://wa.me/{SITE['whatsapp']}" rel="noopener">Mande sua pauta pelo WhatsApp</a>
+    <a href="{PAUTA_URL}" rel="noopener">Mande sua pauta pelo {PAUTA_CANAL}</a>
   </div></div>
   <div class="wrap marca">
     <a href="/" class="logo" aria-label="{ESC(SITE['nome'])}, página inicial">
@@ -166,7 +170,7 @@ def layout(title: str, body: str, *, description: str = "", canonical: str = "/"
   <nav aria-label="Redes sociais">
     <a href="{ESC(SITE['instagram'])}" rel="noopener">Instagram</a>
     <a href="{ESC(SITE['facebook'])}" rel="noopener">Facebook</a>
-    <a href="https://wa.me/{SITE['whatsapp']}" rel="noopener">WhatsApp</a>
+    {f'<a href="https://wa.me/{SITE["whatsapp"]}" rel="noopener">WhatsApp</a>' if SITE.get("whatsapp") else f'<a href="mailto:{SITE["email_redacao"]}">E-mail</a>'}
     <a href="/feed.xml">RSS</a>
   </nav>
   <p class="copy">© {ano} {ESC(SITE['nome'])}. Mauá, SP.</p>
@@ -262,7 +266,7 @@ def post_page(p: dict, posts: list[dict]) -> None:
   <div class="texto">{p['conteudo_html']}</div>
   {credito}
   {f'<ul class="tags">{tags}</ul>' if tags else ''}
-  <aside class="pauta">Viu algo no seu bairro? <a href="https://wa.me/{SITE['whatsapp']}">Mande sua pauta para a redação</a>.</aside>
+  <aside class="pauta">Viu algo no seu bairro? <a href="{PAUTA_URL}">Mande sua pauta para a redação</a>.</aside>
 </article>
 {f'<section class="bloco"><h2 class="titulo-secao">Leia também</h2><div class="grade">{"".join(card(q) for q in rel)}</div></section>' if rel else ''}"""
     write(p["url"], layout(p["titulo"], body, description=p.get("subtitulo") or plain(p["conteudo_html"]),
