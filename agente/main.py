@@ -109,6 +109,10 @@ def run_once(dry_run: bool = False) -> dict[str, int]:
     # Ordem: Mauá (0), resto do ABC (1), política nacional/SP (2); maior nota antes.
     # ABC e política só completam as vagas, até MAX_ABC_PER_RUN e MAX_POLITICA_PER_RUN.
     candidates.sort(key=lambda c: (c[0], -c[1]))
+    # Vaga fixa: as primeiras MIN_POLITICA_PER_RUN matérias de política vão para a frente,
+    # para entrarem mesmo quando a fila de Mauá está cheia.
+    reserved = [c for c in candidates if c[0] == 2][:settings.min_politica_per_run]
+    candidates = reserved + [c for c in candidates if c not in reserved]
     log.info("Candidatas: %d de Mauá, %d do Grande ABC, %d de política Brasil/SP",
              *(sum(1 for c in candidates if c[0] == t) for t in (0, 1, 2)))
 

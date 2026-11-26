@@ -48,6 +48,7 @@ class Settings:
     # Quantas pautas só do Grande ABC (sem Mauá) podem entrar por rodada, para completar.
     max_abc_per_run: int = int(os.getenv("MAX_ABC_PER_RUN", "1"))
     max_politica_per_run: int = int(os.getenv("MAX_POLITICA_PER_RUN", "2"))
+    min_politica_per_run: int = int(os.getenv("MIN_POLITICA_PER_RUN", "1"))
     min_relevance_score: int = int(os.getenv("MIN_RELEVANCE_SCORE", "3"))
     max_age_hours: int = int(os.getenv("MAX_AGE_HOURS", "48"))
     loop_interval_minutes: int = int(os.getenv("LOOP_INTERVAL_MINUTES", "30"))
