@@ -65,13 +65,15 @@ def url_materia(post: dict) -> str:
 def buscar_foto(post: dict) -> tuple[bytes, str] | None:
     if not PEXELS_KEY:
         return None
-    buscas = [t for t in post.get("tags", []) if t.lower() not in ("mauá", "maua", "grande abc")][:2]
+    buscas = [post["busca_foto"]] if post.get("busca_foto") else []
+    buscas += [t for t in post.get("tags", []) if t.lower() not in ("mauá", "maua", "grande abc")][:2]
     buscas.append(BUSCA_EDITORIA.get(post.get("categoria"), "cidade brasil"))
     for q in buscas:
         try:
             r = requests.get("https://api.pexels.com/v1/search", timeout=20,
                              headers={"Authorization": PEXELS_KEY, **UA},
-                             params={"query": q, "locale": "pt-BR", "per_page": 5, "orientation": "portrait"})
+                             params={"query": q, "per_page": 5, "orientation": "portrait",
+                                     **({} if q == post.get("busca_foto") else {"locale": "pt-BR"})})
             r.raise_for_status()
             fotos = r.json().get("photos", [])
         except Exception as exc:  # noqa: BLE001

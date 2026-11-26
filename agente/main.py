@@ -160,7 +160,8 @@ def run_once(dry_run: bool = False) -> dict[str, int]:
                 post_id = None
             else:
                 post = publisher.create_draft(news.titulo, news.subtitulo, news.conteudo_html,
-                                              news.categoria, news.tags, art.source, art.url, note)
+                                              news.categoria, news.tags, art.source, art.url, note,
+                                              busca_foto=getattr(news, "busca_foto", ""))
                 post_id = post["id"]
                 if post.get("duplicada"):
                     db.record(art.url, art.title, art.source, "descartada", score, error="pauta já enviada")

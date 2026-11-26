@@ -73,7 +73,7 @@ class WordPressPublisher:
 
     def create_draft(self, titulo: str, subtitulo: str, conteudo_html: str, categoria: str,
                      tags: list[str], source_name: str, source_url: str,
-                     review_note: str | None = None) -> dict:
+                     review_note: str | None = None, busca_foto: str = "") -> dict:
         credit = (
             f'<p class="fonte-original"><em>Com informações de '
             f'<a href="{html.escape(source_url)}" rel="nofollow noopener" target="_blank">'

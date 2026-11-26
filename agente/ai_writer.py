@@ -35,6 +35,7 @@ Estrutura:
   Não inclua o título no corpo nem uma linha de "fonte" (o sistema adiciona o crédito).
 - categoria: exatamente uma entre Notícias (cotidiano, cidade, serviços, segurança, mobilidade, educação), Política, Esportes, Entretenimento (cultura, lazer, eventos) e Saúde.
 - tags: de 3 a 6 tags curtas em minúsculas (ex.: "mauá", "linha 10", "saúde pública"). Inclua o nome da cidade principal.
+- busca_foto: 2 a 4 palavras EM INGLÊS para buscar uma foto ilustrativa genérica num banco de imagens (ex.: "street flooding drainage", "covid vaccine nurse", "train station brazil"). Sem nomes de pessoas, cidades ou marcas.
 """
 
 
@@ -44,6 +45,7 @@ class NoticiaReescrita(BaseModel):
     conteudo_html: str = Field(description="Corpo em HTML limpo, sem <h1>")
     categoria: Categoria
     tags: list[str] = Field(description="3 a 6 tags curtas em minúsculas")
+    busca_foto: str = Field(description="2 a 4 palavras em inglês para buscar foto ilustrativa")
 
 
 class AIWriterError(Exception):

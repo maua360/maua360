@@ -69,7 +69,7 @@ class GitHubPublisher:
 
     def create_draft(self, titulo: str, subtitulo: str, conteudo_html: str, categoria: str,
                      tags: list[str], source_name: str, source_url: str,
-                     review_note: str | None = None) -> dict:
+                     review_note: str | None = None, busca_foto: str = "") -> dict:
         now = datetime.now(BRT).replace(microsecond=0)
         slug = slugify(titulo)
         # Branch sem horário: a mesma pauta nunca gera dois PRs, mesmo se o
@@ -89,6 +89,8 @@ class GitHubPublisher:
             "fonte_url": source_url,
             "conteudo_html": conteudo_html,
         }
+        if busca_foto:
+            post["busca_foto"] = busca_foto  # usado pelo redes/publicar.py para achar a foto
 
         base_sha = self._req("GET", f"/git/ref/heads/{self.base}")["object"]["sha"]
         resp = self.session.post(f"{API}/repos/{self.repo}/git/refs", timeout=self.timeout,
