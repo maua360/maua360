@@ -10,8 +10,9 @@ on:
   workflow_dispatch:
     inputs:
       slug:
-        description: "Slug da matéria (parte final do endereço)"
-        required: true
+        description: "Slug da matéria (parte final do endereço). Deixe vazio para só verificar a conexão."
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -44,7 +45,9 @@ jobs:
           SLUG: ${{ inputs.slug }}
           BEFORE: ${{ github.event.before }}
         run: |
-          if [ -n "$SLUG" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ -z "$SLUG" ]; then
+            python redes/publicar.py --verificar
+          elif [ -n "$SLUG" ]; then
             python redes/publicar.py --slug "$SLUG"
           else
             python redes/publicar.py "$BEFORE" "$GITHUB_SHA"

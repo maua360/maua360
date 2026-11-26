@@ -186,7 +186,27 @@ def postar(post: dict) -> dict:
     return feitos
 
 
+def verificar() -> None:
+    """Só leitura: confere se o token enxerga a página e o Instagram. Não posta nada."""
+    if not PAGE_TOKEN:
+        raise SystemExit("Falta o segredo META_PAGE_TOKEN")
+    if PAGE_ID:
+        p = graph("GET", PAGE_ID, fields="name,link")
+        log(f"Página do Facebook ok: {p.get('name')} ({p.get('link', '')})")
+        perms = graph("GET", "me/permissions").get("data", [])
+        if perms:
+            log("Permissões:", ", ".join(x["permission"] for x in perms if x.get("status") == "granted"))
+    if IG_ID:
+        i = graph("GET", IG_ID, fields="username,name")
+        log(f"Instagram ok: @{i.get('username')}")
+        lim = graph("GET", f"{IG_ID}/content_publishing_limit", fields="quota_usage,config").get("data", [{}])
+        log("Limite de posts no Instagram:", lim[0] if lim else "?")
+
+
 def main() -> None:
+    if sys.argv[1:2] == ["--verificar"]:
+        verificar()
+        return
     if sys.argv[1:2] == ["--slug"]:
         arquivos = sorted(POSTS.glob(f"*-{sys.argv[2]}.json"))
     else:
