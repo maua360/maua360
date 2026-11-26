@@ -19,7 +19,7 @@ from logging.handlers import RotatingFileHandler
 
 from ai_writer import AIWriter, AIWriterError, unverified_numbers
 from config import BASE_DIR, settings
-from database import Database
+from database import Database, normalize_title
 from relevance import is_maua, is_relevant
 from scraper import MIN_TEXT_CHARS, Scraper
 from github_publisher import GitHubPublisher
@@ -70,19 +70,25 @@ def run_once(dry_run: bool = False) -> dict[str, int]:
 
     # 1ª passada (sem gastar tokens): filtra e separa pautas de Mauá das do resto do ABC.
     candidates = []
+    seen_titles: set[str] = set()   # várias buscas do Google trazem a mesma matéria
     for art in articles:
         if _stop:
             break
         if db.is_known(art.url, art.title):
             counts["duplicadas"] += 1
             continue
+        key = normalize_title(art.title)
+        if key in seen_titles:
+            counts["duplicadas"] += 1
+            continue
+        seen_titles.add(key)
         if cutoff and art.published and art.published < cutoff:
             counts["antigas"] += 1
             continue
 
-        # 1º filtro só com título+resumo (barato, sem baixar a página).
+        # 1º filtro só com título+resumo (barato, sem baixar a página). Links do Google Notícias não ganham segunda chance: abrir cada um custa duas chamadas ao Google.
         ok, score, hits = is_relevant(art.title, art.summary, settings.min_relevance_score, art.trust_region)
-        if not ok and not art.trust_region:
+        if not ok and not art.trust_region and "news.google." not in art.url:
             # Dá uma segunda chance com o texto completo, que pode citar Mauá só no corpo.
             scraper.enrich(art)
             ok, score, hits = is_relevant(art.title, art.text, settings.min_relevance_score, art.trust_region)

@@ -1,13 +1,14 @@
 """Coleta de notícias via RSS (feedparser) e raspagem HTML (requests + BeautifulSoup)."""
 from __future__ import annotations
 
+import json
 import logging
 import re
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Iterable
-from urllib.parse import urljoin
+from urllib.parse import quote, urljoin, urlsplit
 
 import feedparser
 import requests
@@ -108,6 +109,40 @@ class Scraper:
         return best or soup.body
 
     # ------------------------------------------------------------------- RSS
+    def resolve_google_news(self, url: str) -> str:
+        """Troca o link de redirecionamento do Google Notícias pelo endereço do veículo.
+
+        O Google não redireciona com HTTP 302: a página dele carrega o destino por JavaScript.
+        Aqui fazemos a mesma chamada que a página faz. Se o Google mudar algo, devolve o
+        link original e a matéria cai em "texto insuficiente", sem quebrar a execução.
+        """
+        parts = urlsplit(url)
+        segs = parts.path.rstrip("/").split("/")
+        if "news.google." not in parts.netloc or len(segs) < 2 or segs[-2] not in ("articles", "read"):
+            return url
+        gid = segs[-1]
+        try:
+            page = self._get(f"https://news.google.com/rss/articles/{gid}")
+            node = BeautifulSoup(page.text, "lxml").select_one("[data-n-a-sg][data-n-a-ts]")
+            if node is None:
+                return url
+            sig, ts = node["data-n-a-sg"], node["data-n-a-ts"]
+            inner = ('["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,null,null,'
+                     'null,null,null,0,1],"X","X",1,[1,1,1],1,1,null,0,0,null,0],'
+                     f'"{gid}",{ts},"{sig}"]')
+            body = "f.req=" + quote(json.dumps([[["Fbv4je", inner, None, "generic"]]]))
+            resp = self.session.post(
+                "https://news.google.com/_/DotsSplashUi/data/batchexecute", data=body,
+                headers={"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+                timeout=self.timeout)
+            resp.raise_for_status()
+            data = json.loads(resp.text.split("\n\n", 1)[1])
+            real = json.loads(data[0][2])[1]
+            return real if isinstance(real, str) and real.startswith("http") else url
+        except Exception as exc:  # noqa: BLE001
+            log.warning("Não deu para abrir o link do Google Notícias %s: %s", url, exc)
+            return url
+
     def collect_rss(self, source: dict) -> list[Article]:
         resp = self._get(source["url"])
         feed = feedparser.parse(resp.content)
@@ -120,6 +155,11 @@ class Scraper:
             title = self.clean_text(entry.get("title", ""))
             if not link or not title:
                 continue
+            # Google Notícias põe " - Nome do Veículo" no título. Tirar evita que um veículo
+            # chamado "Mauá Agora" faça qualquer notícia parecer de Mauá.
+            outlet = (entry.get("source") or {}).get("title", "")
+            if outlet and title.endswith(f" - {outlet}"):
+                title = title[: -len(outlet) - 3].rstrip(" |-")
             published = None
             for key in ("published_parsed", "updated_parsed"):
                 if entry.get(key):
@@ -190,6 +230,10 @@ class Scraper:
         if not cfg.get("fetch_full_text", True) or len(article.content) >= MIN_TEXT_CHARS:
             return article
         try:
+            if "news.google." in article.url:
+                article.url = self.resolve_google_news(article.url)
+                if "news.google." in article.url:
+                    return article
             text, image = self.fetch_full_text(article.url, cfg.get("content_selector"))
             if len(text) > len(article.content):
                 article.content = text

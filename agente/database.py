@@ -74,10 +74,11 @@ class Database:
         """True se a URL ou um título equivalente já foi visto (exceto falhas, que podem ser refeitas)."""
         with self._conn() as conn:
             row = conn.execute(
-                "SELECT status FROM articles WHERE url_hash = ? OR title_hash = ? LIMIT 1",
+                "SELECT status, error FROM articles WHERE url_hash = ? OR title_hash = ? LIMIT 1",
                 (_sha(normalize_url(url)), _sha(normalize_title(title))),
             ).fetchone()
-        return row is not None and row["status"] != "erro"
+        # "texto insuficiente" também pode ser refeito: o link pode abrir na próxima rodada.
+        return row is not None and row["status"] != "erro" and row["error"] != "texto insuficiente"
 
     def record(
         self,

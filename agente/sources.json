@@ -22,11 +22,11 @@
       "name": "Google Notícias - Mauá",
       "type": "rss",
       "url": "https://news.google.com/rss/search?q=Mau%C3%A1+SP+when:2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-      "fetch_full_text": false,
+      "fetch_full_text": true,
       "trust_region": false,
       "verified": false,
       "enabled": true,
-      "_nota": "Agrega vários veículos. Os links passam por redirecionamento do Google; só o título/resumo é usado."
+      "_nota": "Agrega vários veículos. O agente abre o link do Google para chegar ao site do veículo e baixar o texto completo."
     },
     {
       "name": "Prefeitura de Mauá",
@@ -71,31 +71,31 @@
       "name": "Google Notícias - Prefeitura de Mauá",
       "type": "rss",
       "url": "https://news.google.com/rss/search?q=%22Prefeitura%20de%20Mau%C3%A1%22%20when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-      "fetch_full_text": false,
+      "fetch_full_text": true,
       "trust_region": false,
       "verified": false,
       "enabled": true,
-      "_nota": "Agrega vários veículos. Os links passam por redirecionamento do Google; só o título/resumo é usado."
+      "_nota": "Agrega vários veículos. O agente abre o link do Google para chegar ao site do veículo e baixar o texto completo."
     },
     {
       "name": "Google Notícias - Câmara de Mauá",
       "type": "rss",
       "url": "https://news.google.com/rss/search?q=%22C%C3%A2mara%20de%20Mau%C3%A1%22%20when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-      "fetch_full_text": false,
+      "fetch_full_text": true,
       "trust_region": false,
       "verified": false,
       "enabled": true,
-      "_nota": "Agrega vários veículos. Os links passam por redirecionamento do Google; só o título/resumo é usado."
+      "_nota": "Agrega vários veículos. O agente abre o link do Google para chegar ao site do veículo e baixar o texto completo."
     },
     {
       "name": "Google Notícias - Linha 10-Turquesa",
       "type": "rss",
       "url": "https://news.google.com/rss/search?q=%22Linha%2010%22%20CPTM%20Mau%C3%A1%20when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-      "fetch_full_text": false,
+      "fetch_full_text": true,
       "trust_region": false,
       "verified": false,
       "enabled": true,
-      "_nota": "Agrega vários veículos. Os links passam por redirecionamento do Google; só o título/resumo é usado."
+      "_nota": "Agrega vários veículos. O agente abre o link do Google para chegar ao site do veículo e baixar o texto completo."
     }
   ]
 }
