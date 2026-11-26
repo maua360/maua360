@@ -1,0 +1,115 @@
+"""Transforma a issue "Nova matéria" (formulário do GitHub) num rascunho (PR), sem IA.
+
+Roda pelo workflow materia-propria.yml. Lê a issue do arquivo do evento do Actions,
+monta o HTML a partir do texto, abre o PR igual aos do agente e responde na issue.
+"""
+from __future__ import annotations
+
+import html
+import json
+import os
+import re
+import sys
+
+import requests
+
+from github_publisher import GitHubPublisher
+
+CAMPOS = {"Título": "titulo", "Linha fina": "subtitulo", "Editoria": "editoria", "Texto": "texto",
+          "Foto": "foto", "Crédito da foto": "credito", "Tags": "tags", "Assinatura": "autor"}
+EDITORIAS = {"Notícias", "Política", "Esportes", "Entretenimento", "Saúde"}
+IMG_RE = re.compile(r'!\[[^\]]*\]\((https://github\.com/user-attachments/[^)\s]+)\)'
+                    r'|<img[^>]+src="(https://github\.com/user-attachments/[^"]+)"')
+
+
+def ler_formulario(corpo: str) -> dict:
+    dados, atual = {}, None
+    for linha in corpo.replace("\r\n", "\n").split("\n"):
+        m = re.match(r"^###\s+(.+?)\s*$", linha)
+        if m and m.group(1) in CAMPOS:
+            atual = CAMPOS[m.group(1)]
+            dados[atual] = []
+        elif atual:
+            dados[atual].append(linha)
+    limpo = {}
+    for k, v in dados.items():
+        txt = "\n".join(v).strip()
+        limpo[k] = "" if txt == "_No response_" else txt
+    return limpo
+
+
+def _inline(t: str) -> str:
+    t = html.escape(t, quote=False)
+    t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+    return re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<em>\1</em>", t)
+
+
+def texto_para_html(texto: str) -> str:
+    texto = IMG_RE.sub("", texto)  # fotos coladas no texto vão para o cartão, não para o corpo
+    texto = re.sub(r"^(##\s.*)$", r"\n\1\n", texto, flags=re.M)  # intertítulo sempre em bloco próprio
+    partes = []
+    for bloco in re.split(r"\n\s*\n", texto.strip()):
+        bloco = bloco.strip()
+        if not bloco:
+            continue
+        if bloco.startswith("## "):
+            partes.append(f"<h2>{_inline(bloco[3:].strip())}</h2>")
+        elif bloco.startswith("> "):
+            partes.append(f"<blockquote><p>{_inline(re.sub(r'^> ?', '', bloco, flags=re.M))}</p></blockquote>")
+        elif all(l.strip().startswith(("- ", "* ")) for l in bloco.splitlines()):
+            itens = "".join(f"<li>{_inline(l.strip()[2:])}</li>" for l in bloco.splitlines())
+            partes.append(f"<ul>{itens}</ul>")
+        else:
+            partes.append("<p>" + "<br>".join(_inline(l.strip()) for l in bloco.splitlines()) + "</p>")
+    return "".join(partes)
+
+
+def responder(repo: str, token: str, numero: int, texto: str, fechar: bool) -> None:
+    h = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
+    base = f"https://api.github.com/repos/{repo}/issues/{numero}"
+    requests.post(f"{base}/comments", headers=h, json={"body": texto}, timeout=20).raise_for_status()
+    if fechar:
+        requests.patch(base, headers=h, json={"state": "closed", "state_reason": "completed"},
+                       timeout=20).raise_for_status()
+
+
+def main() -> None:
+    evento = json.load(open(os.environ["GITHUB_EVENT_PATH"], encoding="utf-8"))
+    issue = evento["issue"]
+    repo, token = os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_TOKEN"]
+    f = ler_formulario(issue.get("body") or "")
+
+    erros = []
+    if not f.get("titulo"):
+        erros.append("faltou o título")
+    if len(re.sub(r"\s+", " ", f.get("texto", ""))) < 200:
+        erros.append("o texto está muito curto (mínimo de umas 3 linhas)")
+    editoria = f.get("editoria") if f.get("editoria") in EDITORIAS else "Notícias"
+    if erros:
+        responder(repo, token, issue["number"], "Não consegui criar o rascunho: " + "; ".join(erros)
+                  + ". Edite a issue e reabra, ou abra outra.", fechar=False)
+        sys.exit(1)
+
+    fotos = [a or b for a, b in IMG_RE.findall(f.get("foto", "") + "\n" + f.get("texto", ""))]
+    extra = []
+    if fotos:
+        extra += [f"![foto]({fotos[0]})", f"Foto: {f.get('credito') or 'Mauá 360'}", ""]
+    extra += [f"Matéria própria enviada pela issue #{issue['number']}.", ""]
+
+    tags = [t.strip().lower() for t in f.get("tags", "").split(",") if t.strip()][:6] or ["mauá"]
+    pub = GitHubPublisher(repo, token, os.getenv("GITHUB_BASE_BRANCH", "main"))
+    r = pub.create_draft(f["titulo"].strip(), f.get("subtitulo", "").strip(), texto_para_html(f["texto"]),
+                         editoria, tags, "", "", autor=f.get("autor", "").strip() or "Redação",
+                         body_extra=extra)
+    if r.get("duplicada"):
+        responder(repo, token, issue["number"],
+                  "Já existe um rascunho com esse título. Mude o título se for outra matéria.", fechar=False)
+        sys.exit(1)
+    responder(repo, token, issue["number"],
+              f"Rascunho criado: {r['link']}\n\nConfira a prévia lá e clique em **Merge** para publicar "
+              "(site, Facebook e Instagram).", fechar=True)
+    print("Rascunho:", r["link"])
+
+
+if __name__ == "__main__":
+    main()

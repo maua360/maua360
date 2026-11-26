@@ -1,0 +1,61 @@
+name: Nova matéria
+description: Escreva uma matéria sua. Ela vira um rascunho (PR) para você conferir e publicar com Merge.
+title: "Matéria: "
+labels: ["nova-materia"]
+body:
+  - type: input
+    id: titulo
+    attributes:
+      label: Título
+      description: Até uns 90 caracteres.
+    validations:
+      required: true
+  - type: input
+    id: subtitulo
+    attributes:
+      label: Linha fina
+      description: Uma frase que complementa o título.
+    validations:
+      required: false
+  - type: dropdown
+    id: editoria
+    attributes:
+      label: Editoria
+      options: ["Notícias", "Política", "Esportes", "Entretenimento", "Saúde"]
+    validations:
+      required: true
+  - type: textarea
+    id: texto
+    attributes:
+      label: Texto
+      description: Separe os parágrafos com uma linha em branco. Para um intertítulo, comece a linha com "## ".
+    validations:
+      required: true
+  - type: textarea
+    id: foto
+    attributes:
+      label: Foto
+      description: Toque aqui e anexe a foto (opcional).
+    validations:
+      required: false
+  - type: input
+    id: credito
+    attributes:
+      label: Crédito da foto
+      description: Ex. "Maria Silva". Em branco sai "Mauá 360".
+    validations:
+      required: false
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: Palavras-chave separadas por vírgula (ex. mauá, saúde, vacinação). Opcional.
+    validations:
+      required: false
+  - type: input
+    id: autor
+    attributes:
+      label: Assinatura
+      description: Nome que aparece como autor. Em branco sai "Redação".
+    validations:
+      required: false

@@ -1,0 +1,33 @@
+name: Matéria própria
+
+# Quando você abre uma issue pelo formulário "Nova matéria", vira um rascunho (PR).
+on:
+  issues:
+    types: [opened, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  rascunho:
+    # Só para quem tem acesso ao repositório (ele é público: qualquer um pode abrir issue).
+    if: >-
+      contains(github.event.issue.labels.*.name, 'nova-materia') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: agente
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: python materia_propria.py
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_BASE_BRANCH: ${{ github.event.repository.default_branch }}

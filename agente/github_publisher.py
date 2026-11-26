@@ -69,7 +69,8 @@ class GitHubPublisher:
 
     def create_draft(self, titulo: str, subtitulo: str, conteudo_html: str, categoria: str,
                      tags: list[str], source_name: str, source_url: str,
-                     review_note: str | None = None, busca_foto: str = "") -> dict:
+                     review_note: str | None = None, busca_foto: str = "",
+                     autor: str = "Redação", body_extra: list[str] | None = None) -> dict:
         now = datetime.now(BRT).replace(microsecond=0)
         slug = slugify(titulo)
         # Branch sem horário: a mesma pauta nunca gera dois PRs, mesmo se o
@@ -83,12 +84,12 @@ class GitHubPublisher:
             "tags": tags,
             "data": now.isoformat(),
             "slug": slug,
-            "autor": "Redação",
+            "autor": autor or "Redação",
             "status": "publicado",
-            "fonte_nome": source_name,
-            "fonte_url": source_url,
             "conteudo_html": conteudo_html,
         }
+        if source_url:  # matérias próprias não têm fonte
+            post["fonte_nome"], post["fonte_url"] = source_name, source_url
         if busca_foto:
             post["busca_foto"] = busca_foto  # usado pelo redes/publicar.py para achar a foto
 
@@ -107,8 +108,10 @@ class GitHubPublisher:
             "branch": branch,
         })
 
-        body = [f"**{categoria}** · {subtitulo}", "",
-                f"Fonte: [{source_name}]({source_url})", ""]
+        body = [f"**{categoria}** · {subtitulo}", ""]
+        if source_url:
+            body += [f"Fonte: [{source_name}]({source_url})", ""]
+        body += body_extra or []
         if review_note:
             body += [f"> ⚠️ **REVISAR:** {review_note}", ""]
         body += ["Para usar uma foto sua: antes do Merge, comente neste PR anexando a foto "
