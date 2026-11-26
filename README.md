@@ -46,7 +46,19 @@ Testar no computador: `python3 build.py --serve` e abrir http://localhost:8000.
    "Enviar e-mail como" no Gmail.
 5. **Google**: cadastre o site no Search Console e envie `sitemap.xml` e `sitemap-noticias.xml`.
 
-## Ligar o agente
+## Agente automático (GitHub Actions, grátis)
+
+O código do agente fica em `agente/` e roda sozinho pelo GitHub Actions
+(`.github/workflows/agente.yml`), de hora em hora das 6h às 22h. Cada matéria relevante vira um
+Pull Request de rascunho. Para configurar:
+
+1. *Settings > Secrets and variables > Actions > New repository secret*: `ANTHROPIC_API_KEY`.
+2. *Settings > Actions > General > Workflow permissions*: marque **Read and write permissions** e
+   **Allow GitHub Actions to create and approve pull requests**.
+3. Opcional, em *Variables*: `CLAUDE_MODEL` (padrão `claude-haiku-5-5`) e `MAX_ARTICLES_PER_RUN` (padrão 5).
+4. Teste em *Actions > Agente de notícias > Run workflow*.
+
+## Ligar o agente no seu computador (alternativa)
 
 1. No GitHub: *Settings > Developer settings > Fine-grained tokens > Generate*, só para o repositório
    `maua360`, com **Contents** e **Pull requests** em *Read and write*.

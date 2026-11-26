@@ -1,0 +1,68 @@
+{
+  "_comentario": "type=rss usa feedparser; type=html raspa uma página de listagem com seletores CSS. 'verified' indica se a URL foi conferida em 26/11/2026. Ajuste os seletores HTML abrindo a página no navegador (F12).",
+  "sources": [
+    {
+      "name": "Diário do Grande ABC",
+      "type": "rss",
+      "url": "https://www.dgabc.com.br/Servicos/RSS/Home",
+      "content_selector": "article, .materia, .texto",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true
+    },
+    {
+      "name": "ABC do ABC",
+      "type": "rss",
+      "url": "https://wp.abcdoabc.com.br/feed/noticias",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true
+    },
+    {
+      "name": "Google Notícias - Mauá",
+      "type": "rss",
+      "url": "https://news.google.com/rss/search?q=Mau%C3%A1+SP+when:2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+      "fetch_full_text": false,
+      "trust_region": false,
+      "verified": false,
+      "enabled": true,
+      "_nota": "Agrega vários veículos. Os links passam por redirecionamento do Google; só o título/resumo é usado."
+    },
+    {
+      "name": "Prefeitura de Mauá",
+      "type": "html",
+      "url": "https://www.maua.sp.gov.br/noticias",
+      "link_selector": "a[href*='/noticia']",
+      "content_selector": "article, .noticia, .conteudo, main",
+      "base_url": "https://www.maua.sp.gov.br",
+      "trust_region": true,
+      "verified": false,
+      "enabled": true,
+      "_nota": "Site sem RSS conhecido. Confirme a URL da listagem e o seletor dos links."
+    },
+    {
+      "name": "Câmara Municipal de Mauá",
+      "type": "html",
+      "url": "https://camaramaua.sp.gov.br/Imprensa/",
+      "link_selector": "a[href*='Noticia'], a[href*='noticia']",
+      "content_selector": "article, .noticia, .conteudo, main",
+      "base_url": "https://camaramaua.sp.gov.br",
+      "trust_region": true,
+      "verified": false,
+      "enabled": true,
+      "_nota": "Confirme a página de notícias e os seletores."
+    },
+    {
+      "name": "CPTM - Linha 10",
+      "type": "html",
+      "url": "https://www.cptm.sp.gov.br/sala-imprensa/Noticias/Pages/Lista.aspx",
+      "link_selector": "a[href*='Noticias']",
+      "content_selector": "article, .noticia, .ms-rtestate-field, main",
+      "base_url": "https://www.cptm.sp.gov.br",
+      "trust_region": false,
+      "verified": false,
+      "enabled": true,
+      "_nota": "Notícias da CPTM cobrem toda a rede; o filtro de relevância deixa passar só o que citar Linha 10/Mauá/ABC."
+    }
+  ]
+}

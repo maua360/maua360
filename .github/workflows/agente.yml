@@ -1,0 +1,77 @@
+name: Agente de notícias
+
+# Roda de hora em hora, das 6h às 22h (horário de Brasília = UTC-3).
+# Também pode ser disparado à mão em Actions > Agente de notícias > Run workflow.
+on:
+  schedule:
+    - cron: "17 0,1,9-23 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write        # criar o branch e o arquivo da matéria
+  pull-requests: write   # abrir o PR de rascunho
+
+concurrency:
+  group: agente-noticias
+  cancel-in-progress: false
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: agente
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: agente/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      # Histórico de pautas já vistas (SQLite), guardado entre execuções.
+      - name: Restaurar histórico
+        uses: actions/cache/restore@v4
+        with:
+          path: agente/data
+          key: agente-db-${{ github.run_id }}
+          restore-keys: agente-db-
+
+      - name: Coletar, reescrever e abrir rascunhos
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PUBLISHER: github
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_BASE_BRANCH: ${{ github.event.repository.default_branch }}
+          # Troque em Settings > Secrets and variables > Actions > Variables, sem mexer no código.
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL || 'claude-haiku-5-5' }}
+          MAX_ARTICLES_PER_RUN: ${{ vars.MAX_ARTICLES_PER_RUN || '5' }}
+          USER_AGENT: "Maua360Bot/1.0 (+https://maua360.com.br/contato/)"
+          LOG_FILE: logs/agente.log
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Falta o segredo ANTHROPIC_API_KEY (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          python main.py
+
+      - name: Salvar histórico
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: agente/data
+          key: agente-db-${{ github.run_id }}
+
+      - name: Guardar log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-agente
+          path: agente/logs/
+          retention-days: 7
+          if-no-files-found: ignore
