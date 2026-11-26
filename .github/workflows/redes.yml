@@ -1,0 +1,51 @@
+name: Redes sociais
+
+# Roda quando uma matéria entra no main (você clicou em Merge no PR de rascunho):
+# cria a imagem da matéria e posta no Facebook e no Instagram.
+# Para reprocessar uma matéria: Actions > Redes sociais > Run workflow, informando o slug.
+on:
+  push:
+    branches: [main]
+    paths: ["content/posts/**"]
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Slug da matéria (parte final do endereço)"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: redes-sociais
+  cancel-in-progress: false
+
+jobs:
+  postar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: redes/requirements.txt
+      - run: pip install -r redes/requirements.txt
+      - name: Imagens e posts
+        env:
+          SITE_URL: ${{ vars.SITE_URL || 'https://maua360.pages.dev' }}
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          SLUG: ${{ inputs.slug }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ -n "$SLUG" ]; then
+            python redes/publicar.py --slug "$SLUG"
+          else
+            python redes/publicar.py "$BEFORE" "$GITHUB_SHA"
+          fi

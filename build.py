@@ -69,6 +69,11 @@ def write(path: str, content: str) -> None:
 EDITORIAS = {e["nome"]: e for e in SITE["editorias"]}
 
 
+def abs_url(u: str) -> str:
+    """Caminho do site (/static/...) vira endereço completo, como pedem og:image e JSON-LD."""
+    return SITE["url"] + u if u.startswith("/") else u
+
+
 def editoria_slug(nome: str) -> str:
     return EDITORIAS.get(nome, {"slug": slugify(nome)})["slug"]
 
@@ -254,7 +259,7 @@ def post_page(p: dict, posts: list[dict]) -> None:
         "mainEntityOfPage": share_url,
     }
     if p.get("imagem"):
-        ld["image"] = [p["imagem"]]
+        ld["image"] = [abs_url(p["imagem"])]
     body = f"""<article class="materia">
   <a class="editoria" href="/{p['cat_slug']}/">{ESC(p.get('categoria', 'Notícias'))}</a>
   <h1>{ESC(p['titulo'])}</h1>
@@ -269,7 +274,7 @@ def post_page(p: dict, posts: list[dict]) -> None:
 </article>
 {f'<section class="bloco"><h2 class="titulo-secao">Leia também</h2><div class="grade">{"".join(card(q) for q in rel)}</div></section>' if rel else ''}"""
     write(p["url"], layout(p["titulo"], body, description=p.get("subtitulo") or plain(p["conteudo_html"]),
-                           canonical=p["url"], og_type="article", image=p.get("imagem", ""),
+                           canonical=p["url"], og_type="article", image=abs_url(p.get("imagem_social") or p.get("imagem", "")),
                            active=p["cat_slug"],
                            extra_head=f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'))
 

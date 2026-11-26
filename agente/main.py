@@ -90,7 +90,10 @@ def run_once(dry_run: bool = False) -> dict[str, int]:
         # 1º filtro só com título+resumo (barato, sem baixar a página). Links do Google Notícias não ganham segunda chance: abrir cada um custa duas chamadas ao Google.
         ok, score, hits = is_relevant(art.title, art.summary, settings.min_relevance_score, art.trust_region)
         national = art.extra.get("source_cfg", {}).get("nacional", False)
-        if not ok and not art.trust_region and not national and "news.google." not in art.url:
+        # Páginas raspadas (type=html) não ganham segunda chance: o "texto" delas pode
+        # incluir a barra lateral com manchetes de Mauá e deixar passar qualquer matéria.
+        is_html = art.extra.get("source_cfg", {}).get("type") == "html"
+        if not ok and not art.trust_region and not national and not is_html and "news.google." not in art.url:
             # Dá uma segunda chance com o texto completo, que pode citar Mauá só no corpo.
             scraper.enrich(art)
             ok, score, hits = is_relevant(art.title, art.text, settings.min_relevance_score, art.trust_region)
