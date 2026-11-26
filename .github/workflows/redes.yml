@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read   # ler a foto que você anexou no PR
 
 concurrency:
   group: redes-sociais
@@ -42,6 +43,7 @@ jobs:
           META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
           SLUG: ${{ inputs.slug }}
           BEFORE: ${{ github.event.before }}
         run: |

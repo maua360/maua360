@@ -2,7 +2,7 @@
 
 Quando você clica em **Merge** num PR de rascunho, o workflow **Redes sociais** (`.github/workflows/redes.yml`):
 
-1. busca uma foto livre no Pexels para ilustrar (só se o segredo `PEXELS_API_KEY` existir), com crédito do fotógrafo;
+1. usa a foto que você anexou num comentário do PR (pelo celular ou computador); se não houver, busca uma foto livre no Pexels para ilustrar (só se o segredo `PEXELS_API_KEY` existir), com crédito do fotógrafo;
 2. desenha o cartão da matéria (1080x1350) em `static/cards/<slug>.jpg`, com logo, editoria e título;
 3. grava a foto e o cartão no JSON da matéria (`imagem`, `imagem_legenda`, `imagem_social`) e faz o commit;
 4. espera o site publicar e posta o cartão no Facebook (com o link) e no Instagram (com "link na bio").
@@ -36,3 +36,11 @@ O app pode ficar em modo de desenvolvimento: como você é administrador do app 
 - Instagram: até 100 posts por API a cada 24 horas; só JPEG; link na legenda não é clicável.
 - Se você trocar a senha do Facebook ou remover o app, o token da página deixa de valer: gere outro (passos 2 a 5).
 - Para repostar uma matéria: Actions > Redes sociais > Run workflow, informando o slug.
+
+## Foto sua (do evento)
+
+1. No app do GitHub, abra o PR da matéria.
+2. Escreva um comentário, toque no ícone de imagem e anexe a foto. Se quiser crédito, escreva na linha de baixo: `Foto: Nome do fotógrafo` (sem isso, sai "Foto: Mauá 360").
+3. Envie o comentário e depois clique em **Merge**.
+
+Vale a foto do comentário mais recente. Só contam comentários de quem tem acesso ao repositório.

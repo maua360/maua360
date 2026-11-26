@@ -111,7 +111,9 @@ class GitHubPublisher:
                 f"Fonte: [{source_name}]({source_url})", ""]
         if review_note:
             body += [f"> ⚠️ **REVISAR:** {review_note}", ""]
-        body += ["Para publicar: confira a prévia do Cloudflare Pages abaixo e clique em **Merge**.",
+        body += ["Para usar uma foto sua: antes do Merge, comente neste PR anexando a foto "
+                 "(se quiser, escreva \"Foto: nome do fotógrafo\" no mesmo comentário).",
+                 "Para publicar: confira a prévia do Cloudflare Pages abaixo e clique em **Merge**.",
                  "Para corrigir: edite o arquivo .json na aba *Files changed* (lápis) antes do merge.",
                  "Para descartar: **Close pull request**."]
         pr = self._req("POST", "/pulls", json={

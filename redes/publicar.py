@@ -1,7 +1,8 @@
 """Quando uma matéria é publicada (merge no main): foto, cartão e posts no Facebook e Instagram.
 
 Passos para cada matéria nova em content/posts/:
-1. Se houver PEXELS_API_KEY, busca uma foto livre (Pexels) para ilustrar, com crédito.
+1. Usa a foto que você anexou no PR da matéria; sem ela, se houver PEXELS_API_KEY,
+   busca uma foto livre (Pexels) para ilustrar, com crédito.
 2. Desenha o cartão 1080x1350 da matéria (static/cards/<slug>.jpg).
 3. Grava no JSON da matéria a foto, a legenda e o cartão; faz commit e push.
 4. Espera o Cloudflare Pages publicar e posta no Facebook (foto + link) e no Instagram.
@@ -14,6 +15,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -87,13 +89,64 @@ def buscar_foto(post: dict) -> tuple[bytes, str] | None:
     return None
 
 
+# ------------------------------------------------------- foto enviada no PR
+# Só aceita anexos hospedados pelo próprio GitHub e só de quem tem acesso ao repositório:
+# o repositório é público, e qualquer pessoa pode comentar num PR.
+IMG_RE = re.compile(r'!\[[^\]]*\]\((https://[^)\s]+)\)|<img[^>]+src="(https://[^"]+)"')
+CREDITO_RE = re.compile(r"^\s*(?:foto|cr[eé]dito)\s*:\s*(.+)$", re.I | re.M)
+HOSTS_OK = ("https://github.com/user-attachments/", "https://user-images.githubusercontent.com/",
+            "https://private-user-images.githubusercontent.com/")
+AUTORES_OK = {"OWNER", "MEMBER", "COLLABORATOR"}
+
+
+def _gh(caminho: str) -> list | dict:
+    r = requests.get(f"https://api.github.com/repos/{os.getenv('GITHUB_REPOSITORY')}{caminho}", timeout=20,
+                     headers={"Authorization": f"Bearer {os.getenv('GITHUB_TOKEN', '')}",
+                              "Accept": "application/vnd.github+json", **UA})
+    r.raise_for_status()
+    return r.json()
+
+
+def foto_do_pr(post: dict) -> tuple[bytes, str] | None:
+    """Foto que você anexou no PR da matéria (comentário ou descrição). A mais recente vale."""
+    if not (os.getenv("GITHUB_TOKEN") and os.getenv("GITHUB_REPOSITORY")):
+        return None
+    dono = os.getenv("GITHUB_REPOSITORY").split("/")[0]
+    try:
+        prs = _gh(f"/pulls?state=all&head={dono}:rascunho/{post['slug'][:60]}")
+        if not prs:
+            return None
+        pr = prs[0]
+        comentarios = [c for c in reversed(_gh(f"/issues/{pr['number']}/comments?per_page=100"))
+                       if c.get("author_association") in AUTORES_OK]
+        textos = [c.get("body") or "" for c in comentarios] + [pr.get("body") or ""]
+        for texto in textos:
+            urls = [u for a, b in IMG_RE.findall(texto) if (u := a or b).startswith(HOSTS_OK)]
+            if not urls:
+                continue
+            r = requests.get(urls[-1], timeout=60, headers=UA)
+            r.raise_for_status()
+            if not r.headers.get("content-type", "").startswith("image/"):
+                log("O anexo do PR não é imagem:", urls[-1])
+                continue
+            m = CREDITO_RE.search(texto)
+            credito = f"Foto: {m.group(1).strip()[:60]}" if m else f"Foto: {SITE['nome']}"
+            log(f"Foto enviada no PR #{pr['number']} ({credito})")
+            return r.content, credito
+    except Exception as exc:  # noqa: BLE001
+        log("Não consegui pegar a foto do PR:", exc)
+    return None
+
+
 # ---------------------------------------------------------------- imagens
 def preparar_imagens(arq: Path) -> dict:
     post = json.loads(arq.read_text(encoding="utf-8"))
     if post.get("imagem_social"):
         return post
     slug = post["slug"]
-    foto = buscar_foto(post)
+    foto, ilustrativa = foto_do_pr(post), False
+    if not foto:
+        foto, ilustrativa = buscar_foto(post), True
     credito = ""
     if foto:
         dados, credito = foto
@@ -105,12 +158,12 @@ def preparar_imagens(arq: Path) -> dict:
         im.thumbnail((1600, 1600))
         im.save(destino, "JPEG", quality=85, optimize=True, progressive=True)
         post["imagem"] = f"/static/fotos/{slug}.jpg"
-        post["imagem_legenda"] = f"Imagem ilustrativa. {credito}"
+        post["imagem_legenda"] = f"Imagem ilustrativa. {credito}" if ilustrativa else credito
         foto = dados
     card = RAIZ / "static" / "cards" / f"{slug}.jpg"
     card.parent.mkdir(parents=True, exist_ok=True)
     card.write_bytes(cartao.desenhar(post["titulo"], post.get("categoria", "Notícias"), foto,
-                                     f"Imagem ilustrativa · {credito}" if credito else "",
+                                     (f"Imagem ilustrativa · {credito}" if ilustrativa else credito) if credito else "",
                                      SITE_URL.split("//", 1)[-1]))
     post["imagem_social"] = f"/static/cards/{slug}.jpg"
     arq.write_text(json.dumps(post, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
