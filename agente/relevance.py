@@ -72,3 +72,25 @@ def is_relevant(title: str, body: str, min_score: int, trust_region: bool = Fals
 def is_maua(hits: list[str], trust_region: bool = False) -> bool:
     """Pauta de Mauá (prioridade) x pauta só do Grande ABC (complemento)."""
     return trust_region or any(h in MAUA_TERMS for h in hits)
+
+
+# Política nacional e do Estado de SP: entra na editoria Política, como complemento.
+POLITICS_TERMS = (
+    "lula", "bolsonaro", "planalto", "congresso", "senado", "senador", "camara dos deputados",
+    "deputado federal", "deputados", "stf", "supremo", "ministro", "ministerio", "governo federal",
+    "eleicao", "eleicoes", "eleitoral", "tse", "pec", "reforma", "orcamento", "partido",
+    "pt", "pl", "psdb", "mdb", "uniao brasil", "psd", "republicanos", "tarcisio", "alesp",
+    "impeachment", "cpi", "pesquisa eleitoral", "presidente da republica",
+    # Estado de São Paulo
+    "governador", "governo de sp", "governo de sao paulo", "governo do estado",
+    "assembleia legislativa", "deputado estadual", "deputados estaduais", "palacio dos bandeirantes",
+    "secretario estadual", "kassab", "prefeito de sao paulo",
+)
+
+
+def is_politics(title: str, summary: str, url: str) -> bool:
+    """Matéria de política (Brasil ou Estado de SP): endereço com /politica ou ao menos dois termos políticos."""
+    if re.search(r"/politica", (url or "").lower()):
+        return True
+    text = _norm(f"{title} {summary}")
+    return sum(1 for t in POLITICS_TERMS if _count(t, text)) >= 2

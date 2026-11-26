@@ -20,7 +20,7 @@ from logging.handlers import RotatingFileHandler
 from ai_writer import AIWriter, AIWriterError, unverified_numbers
 from config import BASE_DIR, settings
 from database import Database, normalize_title
-from relevance import is_maua, is_relevant
+from relevance import is_maua, is_politics, is_relevant
 from scraper import MIN_TEXT_CHARS, Scraper
 from github_publisher import GitHubPublisher
 from wp_publisher import WordPressPublisher, WPError
@@ -67,6 +67,7 @@ def run_once(dry_run: bool = False) -> dict[str, int]:
               if settings.max_age_hours else None)
     processed = 0
     abc_used = 0
+    politica_used = 0
 
     # 1ª passada (sem gastar tokens): filtra e separa pautas de Mauá das do resto do ABC.
     candidates = []
@@ -88,29 +89,41 @@ def run_once(dry_run: bool = False) -> dict[str, int]:
 
         # 1º filtro só com título+resumo (barato, sem baixar a página). Links do Google Notícias não ganham segunda chance: abrir cada um custa duas chamadas ao Google.
         ok, score, hits = is_relevant(art.title, art.summary, settings.min_relevance_score, art.trust_region)
-        if not ok and not art.trust_region and "news.google." not in art.url:
+        national = art.extra.get("source_cfg", {}).get("nacional", False)
+        if not ok and not art.trust_region and not national and "news.google." not in art.url:
             # Dá uma segunda chance com o texto completo, que pode citar Mauá só no corpo.
             scraper.enrich(art)
             ok, score, hits = is_relevant(art.title, art.text, settings.min_relevance_score, art.trust_region)
+        # Política nacional/estadual vale de qualquer fonte (inclusive o governo de SP
+        # republicado por sites de Mauá), mas entra depois das pautas locais.
+        if not ok and is_politics(art.title, art.summary, art.url):
+            candidates.append((2, 0, art, ["politica"]))
+            continue
         if not ok:
             counts["irrelevantes"] += 1
             db.record(art.url, art.title, art.source, "descartada", score)
             log.debug("Descartada (%s): %s", score, art.title)
             continue
-        candidates.append((is_maua(hits, art.trust_region), score, art, hits))
+        candidates.append((0 if is_maua(hits, art.trust_region) else 1, score, art, hits))
 
-    # Mauá primeiro (maior nota antes); o resto do ABC só completa as vagas, até MAX_ABC_PER_RUN.
-    candidates.sort(key=lambda c: (not c[0], -c[1]))
-    log.info("Candidatas: %d de Mauá, %d do Grande ABC",
-             sum(1 for c in candidates if c[0]), sum(1 for c in candidates if not c[0]))
+    # Ordem: Mauá (0), resto do ABC (1), política nacional/SP (2); maior nota antes.
+    # ABC e política só completam as vagas, até MAX_ABC_PER_RUN e MAX_POLITICA_PER_RUN.
+    candidates.sort(key=lambda c: (c[0], -c[1]))
+    log.info("Candidatas: %d de Mauá, %d do Grande ABC, %d de política Brasil/SP",
+             *(sum(1 for c in candidates if c[0] == t) for t in (0, 1, 2)))
 
-    for maua, score, art, hits in candidates:
+    for tier, score, art, hits in candidates:
         if _stop or processed >= settings.max_articles_per_run:
             break
-        if not maua:
+        # Pautas que não cabem nesta rodada não são registradas: podem entrar numa próxima.
+        if tier == 1:
             if abc_used >= settings.max_abc_per_run:
-                continue  # não registra: pode entrar numa rodada com menos pautas de Mauá
+                continue
             abc_used += 1
+        elif tier == 2:
+            if politica_used >= settings.max_politica_per_run:
+                continue
+            politica_used += 1
 
         scraper.enrich(art)
         if len(art.text) < MIN_TEXT_CHARS:
@@ -123,6 +136,8 @@ def run_once(dry_run: bool = False) -> dict[str, int]:
         log.info("Relevante (score=%s, %s): %s", score, ", ".join(hits[:5]), art.title)
         try:
             news = writer.rewrite(art.title, art.text, art.source, art.url)
+            if tier == 2:
+                news.categoria = "Política"
             suspicious = unverified_numbers(news.conteudo_html, art.text)
             note = f"números não encontrados na fonte: {', '.join(suspicious)}" if suspicious else None
             if note:

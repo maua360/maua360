@@ -1,22 +1,35 @@
 {
-  "_comentario": "type=rss usa feedparser; type=html raspa uma página de listagem com seletores CSS. 'verified' indica se a URL foi conferida em 26/11/2026. Ajuste os seletores HTML abrindo a página no navegador (F12).",
+  "_comentario": "type=rss usa feedparser; type=html lê a lista de links de uma página. nacional=true: só entra se citar Mauá/ABC ou se for política (Brasil/SP). 'nota' diz como cada fonte foi testada.",
   "sources": [
     {
-      "name": "Diário do Grande ABC",
+      "name": "Prefeitura de Mauá (via Google Notícias)",
       "type": "rss",
-      "url": "https://www.dgabc.com.br/Servicos/RSS/Home",
-      "content_selector": "article, .materia, .texto",
+      "url": "https://news.google.com/rss/search?q=%22Prefeitura+de+Mau%C3%A1%22+when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
       "fetch_full_text": true,
+      "trust_region": false,
       "verified": true,
-      "enabled": true
+      "enabled": true,
+      "nota": "testada 26/11/2026: maua.sp.gov.br/Noticias carrega a lista por JavaScript; sem feed. Usando a busca."
     },
     {
-      "name": "ABC do ABC",
+      "name": "Câmara de Mauá (via Google Notícias)",
       "type": "rss",
-      "url": "https://wp.abcdoabc.com.br/feed/noticias",
+      "url": "https://news.google.com/rss/search?q=%22C%C3%A2mara+de+Mau%C3%A1%22+when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
       "fetch_full_text": true,
+      "trust_region": false,
       "verified": true,
-      "enabled": true
+      "enabled": true,
+      "nota": "testada 26/11/2026: camaramaua.sp.gov.br/Noticias carrega a lista por JavaScript; sem feed. Usando a busca."
+    },
+    {
+      "name": "CPTM / Linha 10 (via Google Notícias)",
+      "type": "rss",
+      "url": "https://news.google.com/rss/search?q=%22Linha+10%22+CPTM+Mau%C3%A1+when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+      "fetch_full_text": true,
+      "trust_region": false,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: cptm.sp.gov.br bloqueia robôs (Incapsula). Usando a busca."
     },
     {
       "name": "Google Notícias - Mauá",
@@ -24,78 +37,155 @@
       "url": "https://news.google.com/rss/search?q=Mau%C3%A1+SP+when:2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
       "fetch_full_text": true,
       "trust_region": false,
-      "verified": false,
+      "verified": true,
       "enabled": true,
-      "_nota": "Agrega vários veículos. O agente abre o link do Google para chegar ao site do veículo e baixar o texto completo."
+      "nota": "Busca geral por Mauá em vários veículos."
     },
     {
-      "name": "Prefeitura de Mauá",
-      "type": "html",
-      "url": "https://www.maua.sp.gov.br/noticias",
-      "link_selector": "a[href*='/noticia']",
-      "content_selector": "article, .noticia, .conteudo, main",
-      "base_url": "https://www.maua.sp.gov.br",
-      "trust_region": true,
-      "verified": false,
-      "enabled": false,
-      "_nota": "Site sem RSS conhecido. Confirme a URL da listagem e o seletor dos links.",
-      "nota": "Desativada em 26/11/2026: URL/seletores não conferidos (Câmara deu 404). Coberta pelas buscas do Google Notícias abaixo."
-    },
-    {
-      "name": "Câmara Municipal de Mauá",
-      "type": "html",
-      "url": "https://camaramaua.sp.gov.br/Imprensa/",
-      "link_selector": "a[href*='Noticia'], a[href*='noticia']",
-      "content_selector": "article, .noticia, .conteudo, main",
-      "base_url": "https://camaramaua.sp.gov.br",
-      "trust_region": true,
-      "verified": false,
-      "enabled": false,
-      "_nota": "Confirme a página de notícias e os seletores.",
-      "nota": "Desativada em 26/11/2026: URL/seletores não conferidos (Câmara deu 404). Coberta pelas buscas do Google Notícias abaixo."
-    },
-    {
-      "name": "CPTM - Linha 10",
-      "type": "html",
-      "url": "https://www.cptm.sp.gov.br/sala-imprensa/Noticias/Pages/Lista.aspx",
-      "link_selector": "a[href*='Noticias']",
-      "content_selector": "article, .noticia, .ms-rtestate-field, main",
-      "base_url": "https://www.cptm.sp.gov.br",
-      "trust_region": false,
-      "verified": false,
-      "enabled": false,
-      "_nota": "Notícias da CPTM cobrem toda a rede; o filtro de relevância deixa passar só o que citar Linha 10/Mauá/ABC.",
-      "nota": "Desativada em 26/11/2026: URL/seletores não conferidos (Câmara deu 404). Coberta pelas buscas do Google Notícias abaixo."
-    },
-    {
-      "name": "Google Notícias - Prefeitura de Mauá",
+      "name": "Fala Mauá",
       "type": "rss",
-      "url": "https://news.google.com/rss/search?q=%22Prefeitura%20de%20Mau%C3%A1%22%20when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+      "url": "https://www.falamaua.com.br/rss.xml",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: feed RSS ok, só com resumo; texto baixado da página"
+    },
+    {
+      "name": "Folha de Mauá",
+      "type": "html",
+      "url": "https://folhademaua.com.br/",
+      "link_selector": "a[href*='/noticia/']",
+      "content_selector": "article, .noticia, .conteudo, .post-content, .entry-content, main",
+      "base_url": "https://folhademaua.com.br/",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: sem feed; lista lida da página inicial"
+    },
+    {
+      "name": "Portal Mauá e Região",
+      "type": "rss",
+      "url": "https://portalmauaeregiao.com.br/feed/",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: feed RSS ok"
+    },
+    {
+      "name": "Diário do Grande ABC",
+      "type": "rss",
+      "url": "https://www.dgabc.com.br/Servicos/RSS/Home",
+      "content_selector": "article, .materia, .texto",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: feed RSS ok"
+    },
+    {
+      "name": "ABC do ABC",
+      "type": "rss",
+      "url": "https://wp.abcdoabc.com.br/feed/noticias",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: feed RSS ok (abcdoabc.com.br/feed não tem itens; este é o feed certo)"
+    },
+    {
+      "name": "Sobre ABC",
+      "type": "rss",
+      "url": "https://sobreabc.com.br/feed/",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: feed RSS ok"
+    },
+    {
+      "name": "A Guarda da Notícia",
+      "type": "rss",
+      "url": "https://aguardiadanoticia.com/feed/",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: feed RSS ok"
+    },
+    {
+      "name": "JNC Online",
+      "type": "rss",
+      "url": "https://jnconline.com.br/feed/",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: feed RSS ok"
+    },
+    {
+      "name": "ABCD Jornal",
+      "type": "rss",
+      "url": "https://abcdjornal.com.br/feed/",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: feed RSS ok"
+    },
+    {
+      "name": "Grupo ABC News",
+      "type": "rss",
+      "url": "https://grupoabcnews.com.br/rss.xml",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: feed RSS ok, só com resumo; texto baixado da página"
+    },
+    {
+      "name": "Portal Opinião Pública",
+      "type": "html",
+      "url": "https://www.portalopiniaopublica.com.br/",
+      "link_selector": "a[href*='/noticia/']",
+      "content_selector": "article, .noticia, .conteudo, .post-content, .entry-content, main",
+      "base_url": "https://www.portalopiniaopublica.com.br/",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: sem feed; lista lida da página inicial"
+    },
+    {
+      "name": "Repórter Diário e Viva ABC (via Google Notícias)",
+      "type": "rss",
+      "url": "https://news.google.com/rss/search?q=%28site%3Areporterdiario.com.br+OR+site%3Avivaabc.com.br%29+when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
       "fetch_full_text": true,
       "trust_region": false,
-      "verified": false,
+      "verified": true,
       "enabled": true,
-      "_nota": "Agrega vários veículos. O agente abre o link do Google para chegar ao site do veículo e baixar o texto completo."
+      "nota": "testada 26/11/2026: os dois sites bloqueiam robôs (erro 403). Usando a busca do Google restrita a eles."
     },
     {
-      "name": "Google Notícias - Câmara de Mauá",
+      "name": "UOL Notícias",
       "type": "rss",
-      "url": "https://news.google.com/rss/search?q=%22C%C3%A2mara%20de%20Mau%C3%A1%22%20when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+      "url": "https://rss.uol.com.br/feed/noticias.xml",
       "fetch_full_text": true,
-      "trust_region": false,
-      "verified": false,
+      "verified": true,
       "enabled": true,
-      "_nota": "Agrega vários veículos. O agente abre o link do Google para chegar ao site do veículo e baixar o texto completo."
+      "nota": "testada 26/11/2026: feed RSS ok. Nacional: entra se citar Mauá/ABC ou como política.",
+      "nacional": true
     },
     {
-      "name": "Google Notícias - Linha 10-Turquesa",
+      "name": "Metrópoles - Política",
       "type": "rss",
-      "url": "https://news.google.com/rss/search?q=%22Linha%2010%22%20CPTM%20Mau%C3%A1%20when%3A2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+      "url": "https://www.metropoles.com/brasil/politica-brasil/feed",
       "fetch_full_text": true,
-      "trust_region": false,
-      "verified": false,
+      "verified": true,
       "enabled": true,
-      "_nota": "Agrega vários veículos. O agente abre o link do Google para chegar ao site do veículo e baixar o texto completo."
+      "nota": "testada 26/11/2026: feed RSS ok. Nacional: entra se citar Mauá/ABC ou como política.",
+      "nacional": true
+    },
+    {
+      "name": "Metrópoles - São Paulo",
+      "type": "rss",
+      "url": "https://www.metropoles.com/sao-paulo/feed",
+      "fetch_full_text": true,
+      "verified": true,
+      "enabled": true,
+      "nota": "testada 26/11/2026: feed RSS ok. Entra se citar Mauá/ABC ou como política do Estado.",
+      "nacional": true
     }
   ]
 }

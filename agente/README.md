@@ -87,6 +87,8 @@ Para adicionar um portal novo, basta incluir um item em `sources.json`. Muitos s
 - **Palavras-chave**: edite os dicionários em `relevance.py` (bairros, nomes, órgãos). Pesos negativos derrubam conteúdo patrocinado e "Mauá" que não é a cidade (Barão de Mauá, Mauá-RJ).
 - **Custo**: `MAX_ARTICLES_PER_RUN` limita quantas matérias vão para o Claude por execução. Com Haiku 5.5, uma matéria típica custa uma fração de centavo de dólar; com Sonnet 5.5, alguns centavos.
 - **Prioridade Mauá**: pautas de Mauá passam na frente; no máximo `MAX_ABC_PER_RUN` (padrão 1) pautas só do resto do ABC entram por execução, como complemento.
+- **Política Brasil/SP**: matérias de política nacional ou do Estado (UOL, Metrópoles e outras fontes) entram depois das locais, na editoria Política, até `MAX_POLITICA_PER_RUN` (padrão 2) por execução.
+- **Fontes**: `sources.json`; cada fonte tem uma `nota` dizendo como foi testada. Para testar de novo, rode o workflow "Testar fontes" no Actions.
 - **Reprocessar erros**: matérias com status `erro` voltam a ser tentadas na execução seguinte; `descartada` e `rascunho` não.
 
 ## Cuidados legais e editoriais
