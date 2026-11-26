@@ -1,6 +1,11 @@
 name: Testar fontes
 on:
   workflow_dispatch:
+    inputs:
+      args:
+        description: "Testes específicos (feed:URL ou links:URL|trecho), separados por espaço"
+        required: false
+        default: ""
 jobs:
   testar:
     runs-on: ubuntu-latest
@@ -15,4 +20,4 @@ jobs:
           cache: pip
           cache-dependency-path: agente/requirements.txt
       - run: pip install -r requirements.txt
-      - run: python sondar_fontes.py
+      - run: python sondar_fontes.py ${{ inputs.args }}

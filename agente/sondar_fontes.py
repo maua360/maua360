@@ -46,6 +46,38 @@ def feed_ok(url):
     return len(f.entries), e.get("title", "")[:70], len(BeautifulSoup(body, "lxml").get_text()), r.url
 
 
+def detalhe(arg):
+    """feed:URL mostra os 5 primeiros títulos; links:URL|trecho lista links que contêm o trecho."""
+    kind, rest = arg.split(":", 1)
+    if kind == "feed":
+        r = get(rest)
+        if isinstance(r, Exception):
+            print("  erro", r); return
+        f = feedparser.parse(r.content)
+        print(f"  {r.status_code} {len(f.entries)} itens")
+        for e in f.entries[:5]:
+            print("   -", e.get("title", "")[:80], "|", e.get("link", ""))
+    else:
+        url, sub = rest.rsplit("|", 1)
+        r = get(url)
+        if isinstance(r, Exception):
+            print("  erro", r); return
+        soup = BeautifulSoup(r.text, "lxml")
+        hits = [(a.get_text(" ", strip=True)[:60], urljoin(r.url, a["href"])) for a in soup.find_all("a", href=True)
+                if sub.lower() in a["href"].lower()]
+        print(f"  {r.status_code} {len(hits)} links com {sub!r}")
+        for t, h in hits[:8]:
+            print("   -", repr(t), h)
+        if not hits:
+            print("  trecho do HTML:", re.sub(r"\s+", " ", r.text)[:600])
+
+
+if SITES and SITES[0].split(":", 1)[0] in ("feed", "links"):
+    for a in SITES:
+        print("=" * 80, "\n", a, flush=True)
+        detalhe(a)
+    sys.exit(0)
+
 for site in SITES:
     print("=" * 100, "\n", site, flush=True)
     r = get(site)
