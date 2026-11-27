@@ -17,7 +17,7 @@ Sem os segredos da Meta, ele faz só os passos 1 a 3. Nunca usamos fotos dos ve�
 | `META_PAGE_TOKEN` | Token de acesso da página (o de longa duração, que não expira) |
 | `META_IG_USER_ID` | ID da conta do Instagram @portalmaua360 ligada à página |
 
-Variável opcional (aba *Variables*): `SITE_URL`, endereço público do site. Padrão: `https://maua360.pages.dev`. Troque para `https://maua360.com.br` quando o domínio estiver ativo.
+Variável opcional (aba *Variables*): `SITE_URL`, endereço público do site. Padrão: `https://maua360.com.br`.
 
 ## Como tirar os dados da Meta
 
