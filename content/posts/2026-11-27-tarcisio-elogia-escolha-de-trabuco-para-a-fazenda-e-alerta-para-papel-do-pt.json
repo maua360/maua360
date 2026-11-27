@@ -19,5 +19,9 @@
   "busca_foto": "brazil finance ministry building",
   "imagem": "/static/fotos/tarcisio-elogia-escolha-de-trabuco-para-a-fazenda-e-alerta-para-papel-do-pt.jpg",
   "imagem_legenda": "Imagem ilustrativa. Foto: Governo do Estado de São / Wikimedia (CC BY 2.0)",
-  "imagem_social": "/static/cards/tarcisio-elogia-escolha-de-trabuco-para-a-fazenda-e-alerta-para-papel-do-pt.jpg"
+  "imagem_social": "/static/cards/tarcisio-elogia-escolha-de-trabuco-para-a-fazenda-e-alerta-para-papel-do-pt.jpg",
+  "redes": {
+    "facebook": "1439300552603682_122097899679566540",
+    "instagram": "18183731818438868"
+  }
 }
