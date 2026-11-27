@@ -171,7 +171,7 @@ def preparar_imagens(arq: Path) -> dict:
         return post
     slug = post["slug"]
     foto, ilustrativa = foto_do_pr(post), False
-    if not foto:
+    if not foto and not post.get("sem_foto"):  # "sem_foto": true deixa o cartão só com a marca
         foto, ilustrativa = buscar_foto(post), True
     credito = ""
     if foto:
