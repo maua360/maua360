@@ -19,5 +19,9 @@
   "busca_foto": "supreme court justice gavel",
   "imagem": "/static/fotos/moraes-autoriza-ministro-do-tcu-a-visitar-bolsonaro-internado-em-brasilia.jpg",
   "imagem_legenda": "Imagem ilustrativa. Foto: Palácio do Planalto / Wikimedia (CC BY 2.0)",
-  "imagem_social": "/static/cards/moraes-autoriza-ministro-do-tcu-a-visitar-bolsonaro-internado-em-brasilia.jpg"
+  "imagem_social": "/static/cards/moraes-autoriza-ministro-do-tcu-a-visitar-bolsonaro-internado-em-brasilia.jpg",
+  "redes": {
+    "facebook": "1439300552603682_122097988407566540",
+    "instagram": "18119247332132854"
+  }
 }
