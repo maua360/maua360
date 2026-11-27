@@ -19,5 +19,9 @@
   "busca_foto": "soccer coach tactics",
   "imagem": "/static/fotos/thiago-matias-ex-zagueiro-do-palmeiras-assume-o-maua-e-mira-acesso-a-serie-a4.jpg",
   "imagem_legenda": "Imagem ilustrativa. Foto: Palácio do Planalto from / Wikimedia (CC BY 2.0)",
-  "imagem_social": "/static/cards/thiago-matias-ex-zagueiro-do-palmeiras-assume-o-maua-e-mira-acesso-a-serie-a4.jpg"
+  "imagem_social": "/static/cards/thiago-matias-ex-zagueiro-do-palmeiras-assume-o-maua-e-mira-acesso-a-serie-a4.jpg",
+  "redes": {
+    "facebook": "1439300552603682_122097899079566540",
+    "instagram": "18137259938507461"
+  }
 }
