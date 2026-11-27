@@ -98,7 +98,16 @@ def desenhar(titulo: str, categoria: str, foto: bytes | None = None, credito: st
     d.line([(m, H - 112), (W - m, H - 112)], fill=(255, 255, 255, 90), width=2)
     d.text((m, H - 70), site, font=f_rod, fill=LARANJA, anchor="lm")
     if credito:
-        d.text((W - m, H - 70), credito, font=_fonte("Medium", 22), fill=(220, 228, 240), anchor="rm")
+        livre = W - 2 * m - d.textlength(site, font=f_rod) - 40
+        if d.textlength(credito, font=_fonte("Medium", 18)) > livre:
+            credito = credito.replace("Imagem ilustrativa · ", "")  # o crédito e a licença vêm antes
+        for tam in (22, 20, 18, 16):
+            f_cred = _fonte("Medium", tam)
+            if d.textlength(credito, font=f_cred) <= livre:
+                break
+        while d.textlength(credito, font=f_cred) > livre and len(credito) > 10:
+            credito = credito[:-2].rstrip() + "…"
+        d.text((W - m, H - 70), credito, font=f_cred, fill=(220, 228, 240), anchor="rm")
 
     out = BytesIO()
     img.save(out, "JPEG", quality=88, optimize=True, progressive=True)

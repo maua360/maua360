@@ -2,7 +2,7 @@
 
 Quando você clica em **Merge** num PR de rascunho, o workflow **Redes sociais** (`.github/workflows/redes.yml`):
 
-1. usa a foto que você anexou num comentário do PR (pelo celular ou computador); se não houver, busca uma foto livre no Pexels para ilustrar (só se o segredo `PEXELS_API_KEY` existir), com crédito do fotógrafo;
+1. usa a foto que você anexou num comentário do PR (pelo celular ou computador); se não houver, busca uma foto livre no Openverse (Wikimedia Commons, Flickr etc.), só com licença CC0, domínio público ou CC BY, e põe autor, origem e licença no crédito. Não precisa de chave;
 2. desenha o cartão da matéria (1080x1350) em `static/cards/<slug>.jpg`, com logo, editoria e título;
 3. grava a foto e o cartão no JSON da matéria (`imagem`, `imagem_legenda`, `imagem_social`) e faz o commit;
 4. espera o site publicar e posta o cartão no Facebook (com o link) e no Instagram (com "link na bio").
@@ -16,7 +16,6 @@ Sem os segredos da Meta, ele faz só os passos 1 a 3. Nunca usamos fotos dos ve�
 | `META_PAGE_ID` | ID da página do Facebook "Mauá 360" |
 | `META_PAGE_TOKEN` | Token de acesso da página (o de longa duração, que não expira) |
 | `META_IG_USER_ID` | ID da conta do Instagram @portalmaua360 ligada à página |
-| `PEXELS_API_KEY` | Opcional. Chave grátis em https://www.pexels.com/api/ |
 
 Variável opcional (aba *Variables*): `SITE_URL`, endereço público do site. Padrão: `https://maua360.pages.dev`. Troque para `https://maua360.com.br` quando o domínio estiver ativo.
 

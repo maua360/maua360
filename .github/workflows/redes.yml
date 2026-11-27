@@ -13,6 +13,10 @@ on:
         description: "Slug da matéria (parte final do endereço). Deixe vazio para só verificar a conexão."
         required: false
         default: ""
+      teste_foto:
+        description: "Só para teste: busca uma foto livre com estas palavras (em inglês) e não posta nada"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -42,12 +46,14 @@ jobs:
           META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
           META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
-          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
           SLUG: ${{ inputs.slug }}
+          TESTE_FOTO: ${{ inputs.teste_foto }}
           BEFORE: ${{ github.event.before }}
         run: |
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ -z "$SLUG" ]; then
+          if [ -n "$TESTE_FOTO" ]; then
+            python redes/publicar.py --teste-foto "$TESTE_FOTO"
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ -z "$SLUG" ]; then
             python redes/publicar.py --verificar
           elif [ -n "$SLUG" ]; then
             python redes/publicar.py --slug "$SLUG"

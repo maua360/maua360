@@ -1,8 +1,8 @@
 """Quando uma matéria é publicada (merge no main): foto, cartão e posts no Facebook e Instagram.
 
 Passos para cada matéria nova em content/posts/:
-1. Usa a foto que você anexou no PR da matéria; sem ela, se houver PEXELS_API_KEY,
-   busca uma foto livre (Pexels) para ilustrar, com crédito.
+1. Usa a foto que você anexou no PR da matéria; sem ela, busca uma foto livre no
+   Openverse (Wikimedia Commons, Flickr...), só CC0/domínio público/CC BY, com crédito.
 2. Desenha o cartão 1080x1350 da matéria (static/cards/<slug>.jpg).
 3. Grava no JSON da matéria a foto, a legenda e o cartão; faz commit e push.
 4. Espera o Cloudflare Pages publicar e posta no Facebook (foto + link) e no Instagram.
@@ -33,13 +33,12 @@ SITE_URL = (os.getenv("SITE_URL") or SITE["url"]).rstrip("/")
 GRAPH = f"https://graph.facebook.com/{os.getenv('META_GRAPH_VERSION') or 'v23.0'}"
 PAGE_ID, PAGE_TOKEN = os.getenv("META_PAGE_ID"), os.getenv("META_PAGE_TOKEN")
 IG_ID = os.getenv("META_IG_USER_ID")
-PEXELS_KEY = os.getenv("PEXELS_API_KEY")
 UA = {"User-Agent": "Maua360Bot/1.0 (+https://maua360.com.br/contato/)"}
 
 # Buscas de foto por editoria, quando as tags não trazem nada.
 BUSCA_EDITORIA = {
-    "Política": "congresso política brasil", "Saúde": "hospital saúde", "Esportes": "esporte estádio",
-    "Entretenimento": "show cultura", "Notícias": "cidade rua brasil",
+    "Política": "brazil congress", "Saúde": "hospital", "Esportes": "football stadium",
+    "Entretenimento": "concert stage", "Notícias": "city street brazil",
 }
 
 
@@ -64,28 +63,55 @@ def url_materia(post: dict) -> str:
 
 
 # ------------------------------------------------------------------- foto
-def buscar_foto(post: dict) -> tuple[bytes, str] | None:
-    if not PEXELS_KEY:
+LICENCAS = {"cc0": "domínio público", "pdm": "domínio público", "by": "CC BY"}
+PROVEDOR = {"wikimedia": "Wikimedia", "flickr": "Flickr"}
+
+
+def _baixar_imagem(url: str) -> bytes | None:
+    """Baixa e confere se é uma imagem de verdade com pelo menos 1000 px de largura."""
+    from io import BytesIO
+    from PIL import Image
+    try:
+        r = requests.get(url, timeout=30, headers=UA)
+        r.raise_for_status()
+        im = Image.open(BytesIO(r.content))
+        return r.content if im.width >= 1000 else None
+    except Exception:  # noqa: BLE001
         return None
+
+
+def buscar_foto(post: dict) -> tuple[bytes, str] | None:
+    """Foto livre pelo Openverse (agrega Wikimedia Commons, Flickr etc.), sem chave de API.
+
+    Só aceita licenças que permitem uso comercial e adaptação sem "compartilha igual":
+    CC0, domínio público e CC BY. O crédito sai com autor, origem e licença.
+    """
     buscas = [post["busca_foto"]] if post.get("busca_foto") else []
     buscas += [t for t in post.get("tags", []) if t.lower() not in ("mauá", "maua", "grande abc")][:2]
-    buscas.append(BUSCA_EDITORIA.get(post.get("categoria"), "cidade brasil"))
+    buscas.append(BUSCA_EDITORIA.get(post.get("categoria"), "city street"))
     for q in buscas:
         try:
-            r = requests.get("https://api.pexels.com/v1/search", timeout=20,
-                             headers={"Authorization": PEXELS_KEY, **UA},
-                             params={"query": q, "per_page": 5, "orientation": "portrait",
-                                     **({} if q == post.get("busca_foto") else {"locale": "pt-BR"})})
+            r = requests.get("https://api.openverse.org/v1/images/", timeout=30, headers=UA,
+                             params={"q": q, "license": "cc0,pdm,by", "size": "large",
+                                     "mature": "false", "page_size": 10})
             r.raise_for_status()
-            fotos = r.json().get("photos", [])
+            fotos = r.json().get("results", [])
         except Exception as exc:  # noqa: BLE001
-            log("Pexels falhou:", exc)
+            log("Openverse falhou:", exc)
             return None
-        if fotos:
-            f = fotos[0]
-            img = requests.get(f["src"]["large2x"], timeout=30, headers=UA).content
-            log(f"Foto Pexels ({q!r}): {f['url']}")
-            return img, f"Foto: {f['photographer']} / Pexels"
+        for f in fotos:
+            if (f.get("license") or "").lower() not in LICENCAS:
+                continue
+            img = _baixar_imagem(f.get("url", ""))
+            if not img:
+                continue
+            lic = LICENCAS[f["license"].lower()]
+            if lic == "CC BY" and f.get("license_version"):
+                lic += f" {f['license_version']}"
+            autor = (f.get("creator") or "autor desconhecido").strip()[:24]
+            origem = PROVEDOR.get(f.get("source") or f.get("provider"), (f.get("provider") or "").title())
+            log(f"Foto livre ({q!r}): {f.get('foreign_landing_url')} [{lic}]")
+            return img, f"Foto: {autor} / {origem} ({lic})"
     return None
 
 
@@ -256,6 +282,10 @@ def verificar() -> None:
 
 
 def main() -> None:
+    if sys.argv[1:2] == ["--teste-foto"]:
+        achou = buscar_foto({"busca_foto": sys.argv[2], "tags": [], "categoria": "Notícias"})
+        log("Resultado:", achou[1] if achou else "nenhuma foto", f"({len(achou[0])} bytes)" if achou else "")
+        return
     if sys.argv[1:2] == ["--verificar"]:
         verificar()
         return
