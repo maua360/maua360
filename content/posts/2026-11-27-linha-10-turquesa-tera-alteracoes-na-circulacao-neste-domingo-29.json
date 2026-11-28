@@ -19,5 +19,9 @@
   "busca_foto": "commuter train platform",
   "imagem": "/static/fotos/linha-10-turquesa-tera-alteracoes-na-circulacao-neste-domingo-29.jpg",
   "imagem_legenda": "Imagem ilustrativa. Foto: Jorge Láscar from Austra / Wikimedia (CC BY 2.0)",
-  "imagem_social": "/static/cards/linha-10-turquesa-tera-alteracoes-na-circulacao-neste-domingo-29.jpg"
+  "imagem_social": "/static/cards/linha-10-turquesa-tera-alteracoes-na-circulacao-neste-domingo-29.jpg",
+  "redes": {
+    "facebook": "1439300552603682_122098091913566540",
+    "instagram": "18145489693722518"
+  }
 }
